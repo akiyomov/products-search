@@ -1,10 +1,11 @@
-from flask import Flask, request, jsonify,Response
+from flask import Flask, request, jsonify, Response
 import pandas as pd
 import json
 from utils import get_by_barcode
+
 app = Flask(__name__)
 
-df = pd.read_csv('data.csv',encoding='utf-8')
+df = pd.read_csv('data.csv', encoding='utf-8')
 
 @app.route('/get_product_info', methods=['GET'])
 def get_product_info():
@@ -21,5 +22,8 @@ def get_product_info():
     else:
         return jsonify({'error': 'Product information not found for the given barcode'})
 
+# Remove the app.run() from here as it's not needed for deployment
+
+# Ensuring this block runs only when the script is directly executed
 if __name__ == '__main__':
     app.run(debug=False)
