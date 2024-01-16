@@ -1,6 +1,5 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify
 import pandas as pd
-import json
 from utils import get_by_barcode
 
 app = Flask(__name__)
@@ -14,11 +13,11 @@ def get_product_info():
         return jsonify({'error': 'Barcode parameter is missing'})
 
     product_info = get_by_barcode(df, barcode)
-
+    print(product_info)
+    
     if product_info is not None:
-        # Manually create JSON response with ensure_ascii=False
-        response = Response(json.dumps(product_info, ensure_ascii=False), status=200, mimetype='application/json')
-        return response
+        # Use Flask's jsonify to handle JSON response
+        return jsonify({'product_info': product_info})
     else:
         return jsonify({'error': 'Product information not found for the given barcode'})
 
