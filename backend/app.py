@@ -3,7 +3,7 @@ from utils import ProductDatabase
 from werkzeug.exceptions import BadRequest
 
 app = Flask(__name__)
-product_db = ProductDatabase('sample.csv')  # Update with the actual path to your CSV file
+product_db = ProductDatabase('backend/sample.csv')  # Update with the actual path to your CSV file
 
 @app.route('/get_product_info', methods=['GET'])
 def get_product_info():
