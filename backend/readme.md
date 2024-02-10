@@ -4,7 +4,7 @@ This Flask-based application allows users to retrieve product information by pro
 
 ## Overview
 
-The application uses a CSV file (`data.csv`) containing product information. When a user makes a GET request to the `/get_product_info` endpoint with a `barcode` parameter, the application fetches the corresponding product information from the CSV file and returns it as a JSON response.
+The application uses a CSV file (`sample.csv`) containing product information. When a user makes a GET request to the `/get_product_info` endpoint with a `barcode` parameter, the application fetches the corresponding product information from the CSV file and returns it as a JSON response.
 
 ## Installation and Setup
 
@@ -15,7 +15,7 @@ The application uses a CSV file (`data.csv`) containing product information. Whe
 3. Install the required dependencies using pip:
 
    ```bash
-   pip install Flask pandas
+   pip install -r requirements.txt
    ```
 
 4. Place your product information in a CSV file named `data.csv` in the same directory as `app.py`. Ensure the CSV file contains columns relevant to product information such as `barcode`, `name`, `description`, etc.
@@ -45,48 +45,71 @@ The application uses a CSV file (`data.csv`) containing product information. Whe
   - Method: GET
   - Parameters:
     - `barcode` (required): The barcode of the product to retrieve information for.
+    - `language` (default: en) set language(en/kor)
 
-  Example Request:
+Example Request:
 
-  ```http
-  GET /get_product_info?barcode=1234567890
+  ```sh
+ http://0.0.0.0:5000/get_product_info?barcode=8801094202804&language=en
+ http://0.0.0.0:5000/get_product_info?barcode=8801094202804&language=kor
   ```
 
-  Example Response:
+Example Response:
 
   ```json
-  {
-      "barcode": "1234567890",
-      "name": "Product Name",
-      "description": "Product Description",
-      ...
-  }
+{
+    "product_info": 
+      {
+        "barcode": "8801094202804",
+        "boycott_reason": "Coca-Cola has a factory in the illegal Israeli settlement of Atarot, built in Occupied Palestine.",
+        "company": "Coca-Cola Korea Co., Ltd.",
+        "country": "South Korea",
+        "image": "https://storage.googleapis.com/product-search-bds/images/8801094202804.jpg",
+        "package": "pet",
+        "product": "Sprite",
+        "type": "Sparkling water"
+      }
+}
+{
+    "product_info": 
+      {
+        "barcode": "8801094202804",
+        "boycott_reason": null,
+        "company": "한국코카콜라(유), 코카-콜라음료(주)",
+        "country": "대한민국",
+        "image": "https://storage.googleapis.com/product-search-bds/images/8801094202804.jpg",
+        "package": "패트",
+        "product": "스프라이트",
+        "type": "탄산음료"
+      }
+}
+
   ```
 
 ## Demo Request
 
 You can make a demo request to the live endpoint:
 
-Endpoint: [https://asadbeyy.pythonanywhere.com/get_product_info](https://asadbeyy.pythonanywhere.com/get_product_info)
-
 Sample request:
 
 ```http
-GET https://asadbeyy.pythonanywhere.com/get_product_info?barcode=8801097160064
+GET http://211.112.85.26:8080/get_product_info?barcode=8801094202804&language=en
 ```
 
 #### Expected Response
 
 ```json
 {
-  "company": "동아오츠카(주)",
-  "productname": "데미소다   애플",
-  "type": "탄산음료",
-  "package": "캔",
-  "volumeml": "250",
-  "country": "대한민국",
-  "boycott": "NOT",
-  "certificate": "비건",
-  "barcode": 8801097160064
+    "product_info": 
+      {
+        "barcode": "8801094202804",
+        "boycott_reason": "Coca-Cola has a factory in the illegal Israeli settlement of Atarot, built in Occupied Palestine.",
+        "company": "Coca-Cola Korea Co., Ltd.",
+        "country": "South Korea",
+        "image": "https://storage.googleapis.com/product-search-bds/images/8801094202804.jpg",
+        "package": "pet",
+        "product": "Sprite",
+        "type": "Sparkling water"
+    }
 }
 ```
