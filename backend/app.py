@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from utils import ProductDatabase
+from .utils import ProductDatabase
 from werkzeug.exceptions import BadRequest
 
 app = Flask(__name__)
