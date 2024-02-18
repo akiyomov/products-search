@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from .utils import ProductDatabase
+from backend.utils import ProductDatabase
 from werkzeug.exceptions import BadRequest
 
 app = Flask(__name__)
@@ -24,4 +24,4 @@ def handle_bad_request(e):
     return jsonify({'error': 'Bad request', 'message': str(e)}), 400
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True, host='0.0.0.0', port=8080)
