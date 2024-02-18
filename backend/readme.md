@@ -58,32 +58,35 @@ Example Response:
 
   ```json
 {
-    "product_info": 
-      {
-        "barcode": "8801094202804",
-        "boycott_reason": "Coca-Cola has a factory in the illegal Israeli settlement of Atarot, built in Occupied Palestine.",
-        "company": "Coca-Cola Korea Co., Ltd.",
-        "country": "South Korea",
-        "image": "https://storage.googleapis.com/product-search-bds/images/8801094202804.jpg",
-        "package": "pet",
-        "product": "Sprite",
-        "type": "Sparkling water"
-      }
+  "product_info": {
+    "barcode": "8801094202804",
+    "boycott": "company",
+    "boycott_reason": "The “Coca-Cola” brand is a product of the “Coca-Cola Beverage Co., Ltd.”. The “Coca-Cola Beverage Co., Ltd.” has a factory in the illegal Israeli settlement of Atarot, built in Occupied Palestine.",
+    "certificate": null,
+    "company": "Coca-Cola Korea Co., Ltd.",
+    "country": "South Korea",
+    "image_url": "https://storage.googleapis.com/product-search-bds/images/8801094202804.jpg",
+    "package": "pet",
+    "product": "Sprite",
+    "type": "Sparkling water",
+    "volume_ml": "1000"
+}
 }
 {
-    "product_info": 
-      {
-        "barcode": "8801094202804",
-        "boycott_reason": null,
-        "company": "한국코카콜라(유), 코카-콜라음료(주)",
-        "country": "대한민국",
-        "image": "https://storage.googleapis.com/product-search-bds/images/8801094202804.jpg",
-        "package": "패트",
-        "product": "스프라이트",
-        "type": "탄산음료"
-      }
+  "product_info": {
+    "barcode": "8801094202804",
+    "boycott": "company",
+    "boycott_reason": "“코카-콜라” 브랜드는 “코카-콜라음료(주)”회사의 제품이며 “코카-콜라음료(주)” 점령된 팔레스타인에 건설된 이스라엘 불법 정착촌인 아타로트(Atarot)에 공장을 가지고 있다.",
+    "certificate": null,
+    "company": "한국코카콜라(유), 코카-콜라음료(주)",
+    "country": "대한민국",
+    "image_url": "https://storage.googleapis.com/product-search-bds/images/8801094202804.jpg",
+    "package": "패트",
+    "product": "스프라이트",
+    "type": "탄산음료",
+    "volume_ml": "1000"
 }
-
+}
   ```
 
 ## Demo Request
@@ -93,23 +96,24 @@ You can make a demo request to the live endpoint:
 Sample request:
 
 ```http
-GET http://211.112.85.26:8080/get_product_info?barcode=8801094202804&language=en
+GET http://211.112.85.26:150/get_product_info?barcode=8801094202804&language=en
 ```
 
 #### Expected Response
 
 ```json
 {
-    "product_info": 
-      {
-        "barcode": "8801094202804",
-        "boycott_reason": "Coca-Cola has a factory in the illegal Israeli settlement of Atarot, built in Occupied Palestine.",
-        "company": "Coca-Cola Korea Co., Ltd.",
-        "country": "South Korea",
-        "image": "https://storage.googleapis.com/product-search-bds/images/8801094202804.jpg",
-        "package": "pet",
-        "product": "Sprite",
-        "type": "Sparkling water"
-    }
+  "product_info": {
+    "barcode": "8801094202804",
+    "boycott": "company",
+    "boycott_reason": "The “Coca-Cola” brand is a product of the “Coca-Cola Beverage Co., Ltd.”. The “Coca-Cola Beverage Co., Ltd.” has a factory in the illegal Israeli settlement of Atarot, built in Occupied Palestine.",
+    "certificate": null,
+    "company": "Coca-Cola Korea Co., Ltd.",
+    "country": "South Korea",
+    "image_url": "https://storage.googleapis.com/product-search-bds/images/8801094202804.jpg",
+    "package": "pet",
+    "product": "Sprite",
+    "type": "Sparkling water",
+    "volume_ml": "1000"
 }
 ```
