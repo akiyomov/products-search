@@ -3,26 +3,33 @@ import requests
 from functools import lru_cache
 import re
 
+class Product:
+    def __init__(self, barcode, company, product, product_type, packaging, volume_ml, country, boycott, certificate, image_url, boycott_reason):
+        self.barcode = barcode
+        self.company = company
+        self.product = product
+        self.product_type = product_type
+        self.packaging = packaging
+        self.volume_ml = volume_ml
+        self.country = country
+        self.boycott = boycott
+        self.certificate = certificate if pd.notna(certificate) else ""
+        self.image_url = image_url
+        self.boycott_reason = boycott_reason
+
 class ProductDatabase:
-    """
-    Manages product information from a CSV database, including retrieval of
-    product details and boycott reasons based on company. Supports responses
-    in both English and Korean.
-    """
-    
-    # Define a mapping of companies to boycott reasons in both English and Korean
     BOYCOTT_REASONS = {
         "Coca-Cola": {
-            "en": "Coca-Cola has a factory in the illegal Israeli settlement of Atarot, built in Occupied Palestine.",
-            "kor": "코카콜라는 점령된 팔레스타인 지역, 아타로트의 불법 이스라엘 정착지에 공장을 가지고 있습니다."
+            "en": "The “Coca-Cola” brand is a product of the “Coca-Cola Beverage Co., Ltd.”. The “Coca-Cola Beverage Co., Ltd.” has a factory in the illegal Israeli settlement of Atarot, built in Occupied Palestine.",
+            "kor": "“코카-콜라” 브랜드는 “코카-콜라음료(주)”회사의 제품이며 “코카-콜라음료(주)” 점령된 팔레스타인에 건설된 이스라엘 불법 정착촌인 아타로트(Atarot)에 공장을 가지고 있다."
         },
         "Nestle": {
             "en": "Nestlé, the world’s leading food company, holds a majority share in Osem, signaling a robust investment in Israel. With a continuous increase in financial support, Nestlé reaffirms its commitment to the Israeli economy and holds interests in various Israeli companies.",
-            "kor": "세계 최대 식품 회사인 네슬레는 오셈에 대다수 지분을 보유하며 이스라엘에 대한 강력한 투자를 신호합니다. 지속적인 재정 지원 증가로 네슬레는 이스라엘 경제에 대한 약속을 재확인하며 다양한 이스라엘 회사에 관심을 가지고 있습니다."
+            "kor": "세계 최대 식품 회사인 네슬레는 오셈에 대다수 지분을 보유하며 이스라엘에 강력한 투자를 하고 있으며 지속적인 재정 지원으로 이스라엘 회사들을 도와주고 있다."
         },
         "Starbucks": {
             "en": "Starbucks, led by CEO Howard Schultz, is recognized for its strong support of Israel. The company’s partnerships and initiatives align with Israel’s interests, and its presence extends to US military bases, including Guantanamo Bay.",
-            "kor": "하워드 슐츠 CEO가 이끄는 스타벅스는 이스라엘에 대한 강력한 지원으로 인정받습니다. 회사의 파트너십과 이니셔티브는 이스라엘의 이익과 일치하며, 그 존재는 군타나모 베이를 포함한 미군 기지까지 확장됩니다."
+            "kor": "하워드 슐츠 CEO가 이끄는 스타벅스는 이스라엘에 대한 강력한 지원으로 인정받고 있다. 회사의 파트너십과 이니셔티브는 이스라엘을 도와주는 것과 마찬가지이다."
         },
         "Pepsico": {
             "en": "Strauss and PepsiCo have cultivated a collaboration spanning over two decades. Originating in 1990 with the establishment of a salty snacks production site in Sderot, Israel, the partnership began under the umbrella of PepsiCo Frito-Lay. The two companies jointly own Strauss Frito Lay, with each holding a 50% stake. This collaboration includes a licensing agreement granting exclusive rights to manufacture and distribute various snacks in Israel.",
@@ -31,7 +38,7 @@ class ProductDatabase:
     }
 
     def __init__(self, data_source):
-        self.df = pd.read_csv(data_source, encoding='utf-8', dtype={'barcode': str}).set_index('barcode', drop=False)
+        self.df = pd.read_csv(data_source, encoding='utf-8', dtype={'barcode': str})
 
     @staticmethod
     def validate_barcode(barcode):
@@ -42,26 +49,34 @@ class ProductDatabase:
             return None
 
         try:
-            product_info = self.df.loc[barcode]
-        except KeyError:
+            product_row = self.df.loc[self.df['barcode'] == barcode].iloc[0]
+        except IndexError:  # If no matching product is found
             return None
 
-        # Ensure product info is filtered for requested language
-        product_info_filtered = {key: value for key, value in product_info.items() if key.endswith(language) or key == 'barcode'}
-        product_info_filtered['image'] = self._get_image_url(barcode)
+        lang_suffix = "-kor" if language == 'kor' else "-en"
+        boycott_reason = self._get_boycott_reason(product_row['company-en'], language)  # Fetching based on English name as key
 
-        # Handle company name in English for matching, but return reason in requested language
-        company_name_english = product_info.get('company-en', '').lower()  # Assuming there's an 'company-en' column
-        boycott_reason = self._match_company_to_boycott_reason(company_name_english, language)
-        product_info_filtered['boycott_reason'] = boycott_reason
+        product = Product(
+            barcode=barcode,
+            company=product_row[f'company{lang_suffix}'],
+            product=product_row[f'product{lang_suffix}'],
+            product_type=product_row[f'type{lang_suffix}'],
+            packaging=product_row[f'package{lang_suffix}'],
+            volume_ml=product_row['volume-ml'],
+            country=product_row[f'country{lang_suffix}'],
+            boycott=product_row['boycott'],
+            certificate=product_row.get('certificate', ''),
+            image_url=self._get_image_url(barcode),
+            boycott_reason=boycott_reason
+        )
 
-        return product_info_filtered
+        return product
 
-    def _match_company_to_boycott_reason(self, company_name, language):
+    def _get_boycott_reason(self, company_name, language):
         for company, reasons in self.BOYCOTT_REASONS.items():
-            if company.lower() in company_name:
-                return reasons.get(language)
-        return None
+            if company.lower() in company_name.lower():
+                return reasons.get(language, "")
+        return ""
 
     @staticmethod
     @lru_cache(maxsize=1024)
