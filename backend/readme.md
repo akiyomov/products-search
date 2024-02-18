@@ -87,6 +87,10 @@ Example Response:
     "volume_ml": "1000"
 }
 }
+// if product not found response will be
+{
+"error": "Product information not found for the given barcode"
+}
   ```
 
 ## Demo Request
