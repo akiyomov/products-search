@@ -3,7 +3,7 @@ from backend.utils import ProductDatabase
 from werkzeug.exceptions import BadRequest
 
 app = Flask(__name__)
-product_db = ProductDatabase('sample.csv')  # Ensure this path points to your actual CSV file
+product_db = ProductDatabase('backend/sample.csv')  # Ensure this path points to your actual CSV file
 
 @app.route('/get_product_info', methods=['GET'])
 def get_product_info():
@@ -38,4 +38,4 @@ def handle_bad_request(e):
     return jsonify({'error': 'Bad request', 'message': str(e)}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8010)
+    app.run(debug=True, port=8080)
