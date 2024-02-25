@@ -1,48 +1,76 @@
-class Product {
-  String? company;
-  String? productname;
-  String? type;
-  String? package;
-  String? volumeml;
-  String? country;
-  String? boycott;
-  String? certificate;
-  int? barcode;
+class Response {
+  ProductInfo? productInfo;
 
-  Product(
-      {this.company,
-      this.productname,
-      this.type,
-      this.package,
-      this.volumeml,
-      this.country,
-      this.boycott,
-      this.certificate,
-      this.barcode});
+  Response({this.productInfo});
 
-  Product.fromJson(Map<String, dynamic> json) {
-    company = json['company'];
-    productname = json['productname'];
-    type = json['type'];
-    package = json['package'];
-    volumeml = json['volumeml'];
-    country = json['country'];
-    boycott = json['boycott'];
-    certificate = json['certificate'];
-    barcode = json['barcode'];
+  Response.fromJson(Map<String, dynamic> json) {
+    productInfo = json['product_info'] != null
+        ? new ProductInfo.fromJson(json['product_info'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['company'] = this.company;
-    data['productname'] = this.productname;
-    data['type'] = this.type;
-    data['package'] = this.package;
-    data['volumeml'] = this.volumeml;
-    data['country'] = this.country;
-    data['boycott'] = this.boycott;
-    data['certificate'] = this.certificate;
+    if (this.productInfo != null) {
+      data['product_info'] = this.productInfo!.toJson();
+    }
+    return data;
+  }
+}
+
+class ProductInfo {
+  String? barcode;
+  String? boycott;
+  String? boycottReason;
+  Null? certificate;
+  String? company;
+  String? country;
+  String? imageUrl;
+  String? package;
+  String? product;
+  String? type;
+  String? volumeMl;
+
+  ProductInfo(
+      {this.barcode,
+        this.boycott,
+        this.boycottReason,
+        this.certificate,
+        this.company,
+        this.country,
+        this.imageUrl,
+        this.package,
+        this.product,
+        this.type,
+        this.volumeMl});
+
+  ProductInfo.fromJson(Map<String, dynamic> json) {
+    barcode = json['barcode'];
+    boycott = json['boycott'];
+    boycottReason = json['boycott_reason'];
+    certificate = json['certificate'];
+    company = json['company'];
+    country = json['country'];
+    imageUrl = json['image_url'];
+    package = json['package'];
+    product = json['product'];
+    type = json['type'];
+    volumeMl = json['volume_ml'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
     data['barcode'] = this.barcode;
+    data['boycott'] = this.boycott;
+    data['boycott_reason'] = this.boycottReason;
+    data['certificate'] = this.certificate;
+    data['company'] = this.company;
+    data['country'] = this.country;
+    data['image_url'] = this.imageUrl;
+    data['package'] = this.package;
+    data['product'] = this.product;
+    data['type'] = this.type;
+    data['volume_ml'] = this.volumeMl;
     return data;
   }
 }
