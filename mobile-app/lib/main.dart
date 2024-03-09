@@ -9,6 +9,8 @@ import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'locale/locale_keys.g.dart';
+import 'package:auto_size_text/auto_size_text.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,7 +53,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Future<Map> fetchData(String barcode, {String lang = 'en'}) async {
-    const String baseUrl = 'http://211.112.85.26:150/get_product_info';
+    // const String baseUrl = 'http://211.112.85.26:150/get_product_info';
+    const String baseUrl = 'http://58.232.173.100:5000/get_product_info';
     final Map<String, String> queryParams = {
       'barcode': barcode,
       'language': lang
@@ -64,50 +67,56 @@ class _HomePageState extends State<HomePage> {
     };
     try {
       final response = await http.get(uri, headers: headers);
-      if (response.statusCode != 200) {
+      if (response.statusCode != 200 && response.statusCode != 404) {
         throw HttpException('${response.statusCode}');
       }
       Map<String, dynamic> result =
-      json.decode(utf8.decode(response.bodyBytes));
+          json.decode(utf8.decode(response.bodyBytes));
       if (result.containsKey('error')) {
+        productInfo = ProductInfo();
         return Future.error(result);
       }
       Response res = Response.fromJson(result);
       ProductInfo? data = res.productInfo;
-      setState(() {
-        productInfo = data!;
-      });
+      productInfo = data!;
       return {"success": true};
     } on SocketException {
+      productInfo = ProductInfo();
       return Future.error({"error": "No Internet connection 😑"});
     } on HttpException {
+      productInfo = ProductInfo();
       return Future.error({"error": "Couldn't find the post 😱"});
     } on FormatException {
+      productInfo = ProductInfo();
       return Future.error({"error": "Bad response format 👎"});
     } on Exception catch (e) {
+      productInfo = ProductInfo();
       return Future.error({"error": "$e"});
     }
   }
 
   String barcode = ''; // 8801094202804
+  late Future<Map> apiResult;
   late ProductInfo productInfo;
 
   @override
   void initState() {
-    productInfo = ProductInfo();
     super.initState();
+    productInfo = ProductInfo();
   }
 
   Future<void> openScanner() async {
-    var res = await Navigator.push(
+    await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => const SimpleBarcodeScannerPage(),
-        ));
-    setState(() {
-      if (res is String) {
-        barcode = res;
-        productInfo = ProductInfo();
+        )).then((val) async {
+      if (val != null && val is String) {
+        setState(() {
+          barcode = val;
+          productInfo = ProductInfo();
+        });
+        apiResult = fetchData(val, lang: context.locale.toString().substring(0,2));
       }
     });
   }
@@ -146,113 +155,135 @@ class _HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (productInfo.imageUrl != null)
-            Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    productInfo.imageUrl!,
-                    height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.45,
-                    fit: BoxFit.fitHeight,
-                  ),
-                )),
-          SizedBox(height: 30),
           if (barcode != '')
             FutureBuilder<Map>(
-              future: fetchData(barcode, lang: context.locale.toString()[2]),
+              future: apiResult,
               builder: (context, snapshot) {
-                if (snapshot.hasData) {
+                if (snapshot.hasData && snapshot.connectionState == ConnectionState.done) {
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RichText(
-                          text: TextSpan(
+                        Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              productInfo.imageUrl!,
+                              height: MediaQuery.of(context).size.height * 0.35,
+                              fit: BoxFit.fitHeight,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        AutoSizeText.rich(
+                          TextSpan(
                             text: "${productInfo.product ?? ''} ",
                             style: const TextStyle(
                                 color: Colors.red, fontSize: 26),
                             children: <TextSpan>[
-                              TextSpan(text: productInfo.package ?? '',
+                              TextSpan(
+                                  text: productInfo.package ?? '',
                                   style: const TextStyle(
                                       color: Colors.white, fontSize: 26)),
-                              if(productInfo.volumeMl != null)
-                                TextSpan(text: " ${productInfo.volumeMl} ml",
+                              if (productInfo.volumeMl != null)
+                                TextSpan(
+                                    text: " ${productInfo.volumeMl} ml",
                                     style: const TextStyle(
                                         color: Colors.white, fontSize: 26))
                             ],
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        if(productInfo.boycottReason != null)
+                        if (productInfo.boycottReason != null)
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Text(productInfo.boycottReason!,
-                                style: const TextStyle(color: Colors.white)),
+                            child: AutoSizeText(productInfo.boycottReason!,
+                                style: const TextStyle(color: Colors.white), maxLines: 8, overflow: TextOverflow.ellipsis,),
                           ),
-                        if(productInfo.boycott == 'country' || productInfo.boycottReason == null)
+                        if (productInfo.boycott == 'country' ||
+                            productInfo.boycottReason == null)
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: RichText(text: TextSpan(
-                                text: LocaleKeys.country1.tr(),
-                                children: <TextSpan>[
-                                  TextSpan(text: productInfo.company!,
-                                      style: const TextStyle(color: Colors.red)),
+                            child: AutoSizeText.rich(
+                                TextSpan(
+                                    text: LocaleKeys.country1.tr(),
+                                    children: <TextSpan>[
+                                  TextSpan(
+                                      text: productInfo.company!,
+                                      style:
+                                          const TextStyle(color: Colors.red)),
                                   TextSpan(text: LocaleKeys.country2.tr()),
-                                  TextSpan(text: productInfo.country!,
-                                      style: const TextStyle(color: Colors.red)),
+                                  TextSpan(
+                                      text: productInfo.country!,
+                                      style:
+                                          const TextStyle(color: Colors.red)),
                                   TextSpan(text: LocaleKeys.country3.tr())
-                                ]
-                            )),
+                                ]), maxLines: 3, overflow: TextOverflow.ellipsis),
                           ),
-                        if (productInfo.boycott == 'company' ||
-                            productInfo.boycott == 'country')
+                        if (productInfo.boycott == 'company')
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Text(LocaleKeys.boycott_company.tr(),
-                                style: const TextStyle(color: Colors.yellow)),
+                            child: AutoSizeText(LocaleKeys.boycott_company.tr(),
+                                style: const TextStyle(color: Colors.yellow), maxLines: 3, overflow: TextOverflow.ellipsis),
                           ),
+                        if (productInfo.boycott == 'country')
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: AutoSizeText(LocaleKeys.boycott_country.tr(),
+                                style: const TextStyle(color: Colors.yellow), maxLines: 3, overflow: TextOverflow.ellipsis),
+                          ),
+                        //boycott_country
                         if (productInfo.boycott ==
                             'exclusive_contract_with_origin')
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Text(LocaleKeys.exclusive_contract.tr(),
-                                style: const TextStyle(color: Colors.yellow)),
+                            child: AutoSizeText(LocaleKeys.exclusive_contract.tr(),
+                                style: const TextStyle(color: Colors.yellow), maxLines: 2, overflow: TextOverflow.ellipsis),
                           ),
                         if (productInfo.boycott == 'not')
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16.0),
-                            child: RichText(text: TextSpan(
-                                text: LocaleKeys.company1.tr(),
-                                children: <TextSpan>[
-                                  TextSpan(text: productInfo.company!,
-                                      style: const TextStyle(color: Colors.red)),
+                            child: AutoSizeText.rich(
+                                TextSpan(
+                                    text: LocaleKeys.company1.tr(),
+                                    children: <TextSpan>[
+                                  TextSpan(
+                                      text: productInfo.company!,
+                                      style:
+                                          const TextStyle(color: Colors.red)),
                                   TextSpan(text: LocaleKeys.company2.tr()),
-                                ]
-                            )),
+                                ]), maxLines: 2, overflow: TextOverflow.ellipsis),
                           ),
                         if (productInfo.boycott == 'not')
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Text(LocaleKeys.not_boycotted.tr(),
-                                style: const TextStyle(color: Colors.yellow, fontSize: 18)),
+                            child: AutoSizeText(LocaleKeys.not_boycotted.tr(),
+                                style: const TextStyle(
+                                    color: Colors.yellow, fontSize: 18), maxLines: 2, overflow: TextOverflow.ellipsis),
                           ),
                       ],
                     ),
                   );
                 } else if (snapshot.hasError) {
-                  return Center(child: Text('${snapshot.error}', style: const TextStyle(color: Colors.white),));
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Center(
+                        child: Text(
+                      '${snapshot.error}',
+                      style: const TextStyle(color: Colors.white),
+                    )),
+                  );
                 }
                 // By default, show a loading spinner.
-                return const Center(child: CircularProgressIndicator(color: Colors.white));
+                return const Center(
+                    child: CircularProgressIndicator(color: Colors.white));
               },
             ),
           Column(
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
               Center(
                 child: Container(
                   decoration: BoxDecoration(
@@ -262,7 +293,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: TextButton.icon(
                       style:
-                      TextButton.styleFrom(backgroundColor: Colors.white),
+                          TextButton.styleFrom(backgroundColor: Colors.white),
                       onPressed: () => openScanner(),
                       icon: const Icon(Icons.barcode_reader,
                           color: Colors.black, size: 36),

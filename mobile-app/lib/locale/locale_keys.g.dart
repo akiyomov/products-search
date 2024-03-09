@@ -5,6 +5,7 @@ abstract class  LocaleKeys {
   static const info_text = 'info_text';
   static const current_lang = 'current_lang';
   static const boycott_company = 'boycott_company';
+  static const boycott_country = 'boycott_country';
   static const exclusive_contract = 'exclusive_contract';
   static const not_boycotted = 'not_boycotted';
   static const country1 = 'country1';
