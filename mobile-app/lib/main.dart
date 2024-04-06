@@ -176,6 +176,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         SizedBox(height: 20),
+                        // Product title >>>
                         AutoSizeText.rich(
                           TextSpan(
                             text: "${productInfo.product ?? ''} ",
@@ -196,13 +197,15 @@ class _HomePageState extends State<HomePage> {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        // Boycott reason >>>
                         if (productInfo.boycottReason != null)
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: AutoSizeText(productInfo.boycottReason!,
                                 style: const TextStyle(color: Colors.white), maxLines: 8, overflow: TextOverflow.ellipsis,),
                           ),
-                        if (productInfo.boycott == 'country' ||
+                        // Boycott is equal 'country' and reason is null >>>>
+                        if (productInfo.boycott == 'country' &&
                             productInfo.boycottReason == null)
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -222,19 +225,21 @@ class _HomePageState extends State<HomePage> {
                                   TextSpan(text: LocaleKeys.country3.tr())
                                 ]), maxLines: 3, overflow: TextOverflow.ellipsis),
                           ),
+                        // Boycott is equal 'company' >>>>
                         if (productInfo.boycott == 'company')
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: AutoSizeText(LocaleKeys.boycott_company.tr(),
                                 style: const TextStyle(color: Colors.yellow), maxLines: 3, overflow: TextOverflow.ellipsis),
                           ),
+                        // Boycott is equal 'country' >>>>
                         if (productInfo.boycott == 'country')
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: AutoSizeText(LocaleKeys.boycott_country.tr(),
                                 style: const TextStyle(color: Colors.yellow), maxLines: 3, overflow: TextOverflow.ellipsis),
                           ),
-                        //boycott_country
+                        // Boycott is equal 'exclusive_contract_with_origin' >>
                         if (productInfo.boycott ==
                             'exclusive_contract_with_origin')
                           Padding(
@@ -242,6 +247,7 @@ class _HomePageState extends State<HomePage> {
                             child: AutoSizeText(LocaleKeys.exclusive_contract.tr(),
                                 style: const TextStyle(color: Colors.yellow), maxLines: 2, overflow: TextOverflow.ellipsis),
                           ),
+                        // Boycott is equal 'not' >>>
                         if (productInfo.boycott == 'not')
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16.0),
