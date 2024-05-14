@@ -1,16 +1,18 @@
-# check_barcode
+# flutter_native_splash
+```
+settings are implemented in a file named flutter_native_splash.yaml
 
-A new Flutter project.
+dart run flutter_native_splash:create --path=flutter_native_splash.yaml
 
-## Getting Started
+For more information -> https://pub.dev/packages/flutter_native_splash
+```
 
-This project is a starting point for a Flutter application.
+# flutter rename_app
+```
+flutter pub run rename_app:main all="My App Name"
+```
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# flutter_launcher_icons
+```
+flutter pub run flutter_launcher_icons
+```

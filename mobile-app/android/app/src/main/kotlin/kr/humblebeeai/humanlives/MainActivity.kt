@@ -1,4 +1,4 @@
-package com.example.check_barcode
+package kr.humblebeeai.humanlives
 
 import io.flutter.embedding.android.FlutterActivity
 

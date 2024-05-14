@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:check_barcode/model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -11,9 +12,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'locale/locale_keys.g.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 
-
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   await EasyLocalization.ensureInitialized();
   runApp(EasyLocalization(
       supportedLocales: const [Locale('en', 'US'), Locale('ko', 'KO')],
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'BDS in Korea',
+      title: 'Human Lives',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -103,6 +104,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     productInfo = ProductInfo();
+    FlutterNativeSplash.remove();
   }
 
   Future<void> openScanner() async {
@@ -116,7 +118,8 @@ class _HomePageState extends State<HomePage> {
           barcode = val;
           productInfo = ProductInfo();
         });
-        apiResult = fetchData(val, lang: context.locale.toString().substring(0,2));
+        apiResult =
+            fetchData(val, lang: context.locale.toString().substring(0, 2));
       }
     });
   }
@@ -159,7 +162,8 @@ class _HomePageState extends State<HomePage> {
             FutureBuilder<Map>(
               future: apiResult,
               builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasData &&
+                    snapshot.connectionState == ConnectionState.done) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: Column(
@@ -172,6 +176,22 @@ class _HomePageState extends State<HomePage> {
                               productInfo.imageUrl!,
                               height: MediaQuery.of(context).size.height * 0.35,
                               fit: BoxFit.fitHeight,
+                              loadingBuilder: (BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent? loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                        : null,
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ),
@@ -201,8 +221,12 @@ class _HomePageState extends State<HomePage> {
                         if (productInfo.boycottReason != null)
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: AutoSizeText(productInfo.boycottReason!,
-                                style: const TextStyle(color: Colors.white), maxLines: 8, overflow: TextOverflow.ellipsis,),
+                            child: AutoSizeText(
+                              productInfo.boycottReason!,
+                              style: const TextStyle(color: Colors.white),
+                              maxLines: 8,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         // Boycott is equal 'country' and reason is null >>>>
                         if (productInfo.boycott == 'country' &&
@@ -213,39 +237,48 @@ class _HomePageState extends State<HomePage> {
                                 TextSpan(
                                     text: LocaleKeys.country1.tr(),
                                     children: <TextSpan>[
-                                  TextSpan(
-                                      text: productInfo.company!,
-                                      style:
-                                          const TextStyle(color: Colors.red)),
-                                  TextSpan(text: LocaleKeys.country2.tr()),
-                                  TextSpan(
-                                      text: productInfo.country!,
-                                      style:
-                                          const TextStyle(color: Colors.red)),
-                                  TextSpan(text: LocaleKeys.country3.tr())
-                                ]), maxLines: 3, overflow: TextOverflow.ellipsis),
+                                      TextSpan(
+                                          text: productInfo.company!,
+                                          style: const TextStyle(
+                                              color: Colors.red)),
+                                      TextSpan(text: LocaleKeys.country2.tr()),
+                                      TextSpan(
+                                          text: productInfo.country!,
+                                          style: const TextStyle(
+                                              color: Colors.red)),
+                                      TextSpan(text: LocaleKeys.country3.tr())
+                                    ]),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis),
                           ),
                         // Boycott is equal 'company' >>>>
                         if (productInfo.boycott == 'company')
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: AutoSizeText(LocaleKeys.boycott_company.tr(),
-                                style: const TextStyle(color: Colors.yellow), maxLines: 3, overflow: TextOverflow.ellipsis),
+                                style: const TextStyle(color: Colors.yellow),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis),
                           ),
                         // Boycott is equal 'country' >>>>
                         if (productInfo.boycott == 'country')
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: AutoSizeText(LocaleKeys.boycott_country.tr(),
-                                style: const TextStyle(color: Colors.yellow), maxLines: 3, overflow: TextOverflow.ellipsis),
+                                style: const TextStyle(color: Colors.yellow),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis),
                           ),
                         // Boycott is equal 'exclusive_contract_with_origin' >>
                         if (productInfo.boycott ==
                             'exclusive_contract_with_origin')
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: AutoSizeText(LocaleKeys.exclusive_contract.tr(),
-                                style: const TextStyle(color: Colors.yellow), maxLines: 2, overflow: TextOverflow.ellipsis),
+                            child: AutoSizeText(
+                                LocaleKeys.exclusive_contract.tr(),
+                                style: const TextStyle(color: Colors.yellow),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis),
                           ),
                         // Boycott is equal 'not' >>>
                         if (productInfo.boycott == 'not')
@@ -255,19 +288,23 @@ class _HomePageState extends State<HomePage> {
                                 TextSpan(
                                     text: LocaleKeys.company1.tr(),
                                     children: <TextSpan>[
-                                  TextSpan(
-                                      text: productInfo.company!,
-                                      style:
-                                          const TextStyle(color: Colors.red)),
-                                  TextSpan(text: LocaleKeys.company2.tr()),
-                                ]), maxLines: 2, overflow: TextOverflow.ellipsis),
+                                      TextSpan(
+                                          text: productInfo.company!,
+                                          style: const TextStyle(
+                                              color: Colors.red)),
+                                      TextSpan(text: LocaleKeys.company2.tr()),
+                                    ]),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis),
                           ),
                         if (productInfo.boycott == 'not')
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: AutoSizeText(LocaleKeys.not_boycotted.tr(),
                                 style: const TextStyle(
-                                    color: Colors.yellow, fontSize: 18), maxLines: 2, overflow: TextOverflow.ellipsis),
+                                    color: Colors.yellow, fontSize: 18),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis),
                           ),
                       ],
                     ),
